@@ -1,0 +1,98 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String           @id @default(uuid())
+  name            String
+  email           String           @unique
+  phone           String?
+  dateOfBirth     DateTime?
+  gender          String?
+  bloodType       String?
+  height          Float?           // Height in cm
+  weight          Float?           // Weight in kg
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  healthRecords   HealthRecord[]
+  allergies       Allergy[]
+  conditions      Condition[]
+  emergencyContacts EmergencyContact[]
+}
+
+model HealthRecord {
+  id              String    @id @default(uuid())
+  title           String
+  recordType      String    // consultation, labTest, imaging, medication, vaccination, other
+  doctor          String    // Healthcare provider name
+  date            DateTime
+  description     String
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  attachments     Attachment[]
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  aiInsights      AIInsight[]
+}
+
+model Attachment {
+  id              String    @id @default(uuid())
+  filename        String
+  fileType        String    // pdf, jpg, png
+  fileSize        Int       // Size in bytes
+  fileUrl         String    // Storage path or URL
+  recordId        String
+  record          HealthRecord @relation(fields: [recordId], references: [id], onDelete: Cascade)
+  createdAt       DateTime  @default(now())
+}
+
+model Allergy {
+  id              String    @id @default(uuid())
+  name            String
+  severity        String?   // mild, moderate, severe
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model Condition {
+  id              String    @id @default(uuid())
+  name            String
+  diagnosedDate   DateTime?
+  status          String?   // active, in remission, resolved
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model EmergencyContact {
+  id              String    @id @default(uuid())
+  name            String
+  relationship    String
+  phone           String
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model AIInsight {
+  id              String    @id @default(uuid())
+  type            String    // health_risk, recommendation, goal, alert
+  category        String    // diet, exercise, sleep, medication, checkup, etc.
+  content         String
+  priority        String?   // low, medium, high
+  recordId        String?
+  record          HealthRecord? @relation(fields: [recordId], references: [id], onDelete: SetNull)
+  createdAt       DateTime  @default(now())
+}
