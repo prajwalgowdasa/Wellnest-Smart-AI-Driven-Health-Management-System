@@ -2,7 +2,14 @@
 
 import { Button } from "@/components/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Download, FileText, Printer } from "lucide-react";
+import {
+  ArrowLeft,
+  Download,
+  Edit,
+  FileText,
+  Printer,
+  RefreshCw,
+} from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -26,31 +33,40 @@ export default function RecordDetailPage() {
   const [record, setRecord] = useState<HealthRecord | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [isRetrying, setIsRetrying] = useState(false);
+
+  async function fetchRecord() {
+    try {
+      const response = await fetch(`/api/health-records/${id}`);
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error("Record not found");
+        }
+        throw new Error("Failed to fetch record");
+      }
+
+      const data = await response.json();
+      setRecord(data);
+      setError("");
+    } catch (err) {
+      console.error("Error fetching record:", err);
+      setError(err instanceof Error ? err.message : "Failed to load record");
+    } finally {
+      setLoading(false);
+      setIsRetrying(false);
+    }
+  }
 
   useEffect(() => {
-    async function fetchRecord() {
-      try {
-        const response = await fetch(`/api/health-records/${id}`);
-
-        if (!response.ok) {
-          if (response.status === 404) {
-            throw new Error("Record not found");
-          }
-          throw new Error("Failed to fetch record");
-        }
-
-        const data = await response.json();
-        setRecord(data);
-      } catch (err) {
-        console.error("Error fetching record:", err);
-        setError(err instanceof Error ? err.message : "Failed to load record");
-      } finally {
-        setLoading(false);
-      }
-    }
-
     fetchRecord();
   }, [id]);
+
+  const handleRetry = async () => {
+    setIsRetrying(true);
+    setLoading(true);
+    await fetchRecord();
+  };
 
   // Function to handle downloading PDF
   const handleDownloadPDF = () => {
@@ -100,17 +116,42 @@ Description: ${record.description}
         </div>
       ) : error ? (
         <div className="rounded-md bg-red-50 p-4 text-sm text-red-800 dark:bg-red-900/30 dark:text-red-400">
-          {error}
-          <div className="mt-4">
-            <Link href="/health-records">
-              <Button>Return to Health Records</Button>
-            </Link>
+          <div className="flex flex-col gap-4">
+            <p>{error}</p>
+            <div className="flex gap-3">
+              <Button
+                onClick={handleRetry}
+                disabled={isRetrying}
+                className="gap-2"
+              >
+                {isRetrying ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 animate-spin" />
+                    Retrying...
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="h-4 w-4" />
+                    Retry
+                  </>
+                )}
+              </Button>
+              <Link href="/health-records">
+                <Button variant="outline">Return to Health Records</Button>
+              </Link>
+            </div>
           </div>
         </div>
       ) : record ? (
         <div className="space-y-6 print:space-y-4">
           {/* Actions */}
           <div className="flex justify-end gap-2 print:hidden">
+            <Link href={`/health-records/${id}/edit`}>
+              <Button variant="outline" className="gap-2">
+                <Edit className="h-4 w-4" />
+                Edit
+              </Button>
+            </Link>
             <Button variant="outline" className="gap-2" onClick={handlePrint}>
               <Printer className="h-4 w-4" />
               Print

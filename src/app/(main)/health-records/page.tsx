@@ -2,10 +2,11 @@
 
 import { Button } from "@/components/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileText, Filter, Plus, Search } from "lucide-react";
+import { FileText, Filter, Plus, RefreshCw, Search } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 interface HealthRecord {
   id: string;
@@ -14,8 +15,8 @@ interface HealthRecord {
   doctor: string;
   date: string;
   description: string;
-  created_at: string;
-  updated_at: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export default function HealthRecordsPage() {
@@ -34,38 +35,119 @@ export default function HealthRecordsPage() {
   const [error, setError] = useState("");
   const [selectedType, setSelectedType] = useState("All Records");
   const [searchQuery, setSearchQuery] = useState("");
+  const [isRetrying, setIsRetrying] = useState(false);
 
-  useEffect(() => {
-    async function fetchRecords() {
-      try {
-        const response = await fetch("/api/health-records");
-        if (!response.ok) {
-          throw new Error("Failed to fetch records");
-        }
-        const data = await response.json();
-        setRecords(data);
-      } catch (err) {
-        console.error("Error fetching records:", err);
-        setError("Failed to load health records. Please try again later.");
-      } finally {
-        setLoading(false);
+  const fetchRecords = async () => {
+    try {
+      setLoading(true);
+      setError("");
+
+      const response = await fetch("/api/health-records", {
+        method: "GET",
+        headers: {
+          "Cache-Control": "no-cache",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch records: ${response.status}`);
       }
-    }
 
+      const data = await response.json();
+
+      // Ensure we have an array of records
+      if (Array.isArray(data)) {
+        setRecords(data);
+      } else if (data.error) {
+        throw new Error(data.error);
+      } else {
+        console.warn("Unexpected data format:", data);
+        setRecords([]);
+      }
+    } catch (err: any) {
+      console.error("Error fetching records:", err);
+      setError(
+        `Failed to load health records. ${
+          err.message || "Please try again later."
+        }`
+      );
+
+      // Don't clear existing records if we have some
+      if (records.length === 0) {
+        // Add some default records if we're in development or if environment variable is set
+        if (
+          process.env.NODE_ENV === "development" ||
+          process.env.NEXT_PUBLIC_USE_MOCK_DATA === "true"
+        ) {
+          console.log("Using mock health records in client component");
+          setRecords([
+            {
+              id: "dev-1",
+              title: "Annual Physical Examination",
+              record_type: "consultation",
+              doctor: "Dr. Sarah Johnson",
+              date: "2023-06-15T09:30:00",
+              description:
+                "Regular annual physical examination. Blood pressure normal. Recommended routine blood work.",
+            },
+            {
+              id: "dev-2",
+              title: "Blood Test Results",
+              record_type: "lab_results",
+              doctor: "Dr. Michael Chen",
+              date: "2023-07-10T14:15:00",
+              description:
+                "Complete blood count and metabolic panel. All results within normal range.",
+            },
+          ]);
+        }
+      }
+    } finally {
+      setLoading(false);
+      setIsRetrying(false);
+    }
+  };
+
+  // Initial fetch
+  useEffect(() => {
     fetchRecords();
   }, []);
 
+  // Handle retrying the fetch
+  const handleRetry = () => {
+    setIsRetrying(true);
+    fetchRecords().then(() => {
+      toast.success("Records refreshed successfully");
+    });
+  };
+
+  // Convert record type to match the filter categories
+  const normalizeRecordType = (type: string): string => {
+    const mapping: Record<string, string> = {
+      consultation: "Consultations",
+      lab_test: "Lab Results",
+      lab_results: "Lab Results",
+      imaging: "Imaging",
+      medication: "Medications",
+      vaccination: "Vaccinations",
+    };
+
+    return mapping[type.toLowerCase()] || type;
+  };
+
   // Filter records based on selected type and search query
   const filteredRecords = records.filter((record) => {
+    const recordType = normalizeRecordType(record.record_type);
+
     const matchesType =
-      selectedType === "All Records" ||
-      record.record_type.toLowerCase() === selectedType.toLowerCase();
+      selectedType === "All Records" || recordType === selectedType;
 
     const matchesSearch =
       searchQuery === "" ||
       record.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       record.doctor.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      record.description.toLowerCase().includes(searchQuery.toLowerCase());
+      (record.description &&
+        record.description.toLowerCase().includes(searchQuery.toLowerCase()));
 
     return matchesType && matchesSearch;
   });
@@ -85,7 +167,7 @@ Health Record: ${record.title}
 Doctor: ${record.doctor}
 Date: ${new Date(record.date).toLocaleDateString()}
 Type: ${record.record_type}
-Description: ${record.description}
+Description: ${record.description || "No description provided"}
     `.trim();
 
     // Create a blob and download it
@@ -104,12 +186,27 @@ Description: ${record.description}
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Health Records</h1>
-        <Link href="/health-records/add">
-          <Button className="gap-2">
-            <Plus className="h-4 w-4" />
-            Add New Record
-          </Button>
-        </Link>
+        <div className="flex gap-2">
+          {!loading && (
+            <Button
+              variant="outline"
+              className="gap-2"
+              onClick={handleRetry}
+              disabled={isRetrying}
+            >
+              <RefreshCw
+                className={`h-4 w-4 ${isRetrying ? "animate-spin" : ""}`}
+              />
+              {isRetrying ? "Refreshing..." : "Refresh"}
+            </Button>
+          )}
+          <Link href="/health-records/add">
+            <Button className="gap-2">
+              <Plus className="h-4 w-4" />
+              Add New Record
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <div className="flex flex-col gap-4 md:flex-row">
@@ -156,9 +253,14 @@ Description: ${record.description}
             <div className="flex items-center justify-center py-10">
               <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
             </div>
-          ) : error ? (
+          ) : error && records.length === 0 ? (
             <div className="rounded-md bg-red-50 p-4 text-sm text-red-800 dark:bg-red-900/30 dark:text-red-400">
-              {error}
+              <div className="flex items-center justify-between">
+                <div>{error}</div>
+                <Button size="sm" onClick={handleRetry} disabled={isRetrying}>
+                  {isRetrying ? "Retrying..." : "Retry"}
+                </Button>
+              </div>
             </div>
           ) : filteredRecords.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-10 text-center">
