@@ -23,11 +23,18 @@ export const createHealthRecord = async (data: any) => {
   const recordTypeMapping: Record<string, string> = {
     consultation: "consultation",
     labTest: "lab_test",
+    lab_test: "lab_test",
     imaging: "imaging",
     medication: "medication",
     vaccination: "vaccination",
     other: "other",
   };
+
+  // Validate the date is in YYYY-MM-DD format
+  const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+  if (!dateRegex.test(data.date)) {
+    throw new Error("Date must be in YYYY-MM-DD format");
+  }
 
   // Format the date and time
   let formattedDate = data.date;
@@ -51,8 +58,34 @@ export const createHealthRecord = async (data: any) => {
   try {
     const response = await apiClient.post("/health/records/", formattedData);
     return response.data;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Health record creation error:", error);
+
+    // Check for validation errors in the response
+    if (error.response?.data) {
+      // Extract validation errors from the DRF response
+      const apiErrors = error.response.data;
+
+      // Format DRF errors into a more frontend-friendly format
+      const errorMessages: Record<string, string> = {};
+
+      for (const field in apiErrors) {
+        if (Array.isArray(apiErrors[field])) {
+          errorMessages[field] = apiErrors[field][0];
+        } else if (typeof apiErrors[field] === "string") {
+          errorMessages[field] = apiErrors[field];
+        }
+      }
+
+      // Create error object with formatted validation errors
+      const validationError = new Error("Validation failed");
+      (validationError as any).response = {
+        data: { errors: errorMessages },
+      };
+
+      throw validationError;
+    }
+
     throw error;
   }
 };

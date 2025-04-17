@@ -7,6 +7,7 @@ import { ArrowLeft, Clock, Upload } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 type TimeSlot = {
   id: string;
@@ -19,6 +20,9 @@ export default function AddRecordPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [validationErrors, setValidationErrors] = useState<
+    Record<string, string>
+  >({});
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split("T")[0]
   );
@@ -53,14 +57,27 @@ export default function AddRecordPage() {
     e.preventDefault();
     setIsSubmitting(true);
     setError("");
+    setValidationErrors({});
 
     // Get form data
     const formData = new FormData(e.currentTarget);
+    const date = formData.get("date") as string;
+
+    // Validate date format
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!dateRegex.test(date)) {
+      setValidationErrors({
+        date: "Date has wrong format. Use one of these formats instead: YYYY-MM-DD.",
+      });
+      setIsSubmitting(false);
+      return;
+    }
+
     const record = {
       title: formData.get("title") as string,
       recordType: formData.get("recordType") as string,
       doctor: formData.get("doctor") as string,
-      date: formData.get("date") as string,
+      date: date,
       time: formData.get("time") as string,
       description: formData.get("description") as string,
     };
@@ -69,16 +86,25 @@ export default function AddRecordPage() {
       // Submit the record using the API
       await createHealthRecord(record);
 
+      // Show success notification
+      toast.success("Health record created successfully");
+
       // Redirect to records page on success
       router.push("/health-records");
       router.refresh(); // Refresh server components
-    } catch (error) {
-      console.error("Error submitting record:", error);
-      setError(
-        error instanceof Error
-          ? error.message
-          : "An unknown error occurred. Please try again later."
-      );
+    } catch (err: any) {
+      console.error("Error submitting record:", err);
+
+      // Check for validation errors in the response
+      if (err.response?.data?.errors) {
+        setValidationErrors(err.response.data.errors);
+      } else {
+        setError(
+          err instanceof Error
+            ? err.message
+            : "An unknown error occurred. Please try again later."
+        );
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -90,6 +116,14 @@ export default function AddRecordPage() {
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSelectedDate(e.target.value);
+
+    // Clear date validation error when user changes the date
+    if (validationErrors.date) {
+      setValidationErrors((prev) => ({
+        ...prev,
+        date: undefined,
+      }));
+    }
   };
 
   return (
@@ -127,6 +161,11 @@ export default function AddRecordPage() {
                   placeholder="e.g., Annual Physical"
                   required
                 />
+                {validationErrors.title && (
+                  <p className="text-sm text-red-500 mt-1">
+                    {validationErrors.title}
+                  </p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -147,6 +186,11 @@ export default function AddRecordPage() {
                   <option value="vaccination">Vaccination</option>
                   <option value="other">Other</option>
                 </select>
+                {validationErrors.recordType && (
+                  <p className="text-sm text-red-500 mt-1">
+                    {validationErrors.recordType}
+                  </p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -162,6 +206,11 @@ export default function AddRecordPage() {
                   onChange={handleDoctorChange}
                   required
                 />
+                {validationErrors.doctor && (
+                  <p className="text-sm text-red-500 mt-1">
+                    {validationErrors.doctor}
+                  </p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -172,11 +221,21 @@ export default function AddRecordPage() {
                   id="date"
                   name="date"
                   type="date"
-                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  defaultValue={selectedDate}
+                  className={`w-full rounded-md border ${
+                    validationErrors.date ? "border-red-500" : "border-input"
+                  } bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring`}
+                  value={selectedDate}
                   onChange={handleDateChange}
                   required
                 />
+                {validationErrors.date && (
+                  <p className="text-sm text-red-500 mt-1">
+                    {validationErrors.date}
+                  </p>
+                )}
+                <p className="text-xs text-muted-foreground mt-1">
+                  Format: YYYY-MM-DD
+                </p>
               </div>
 
               <div className="space-y-2 col-span-2">
