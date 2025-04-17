@@ -110,7 +110,7 @@ export default function AIInsightsPage() {
       const updateResponse = await triggerAIInsightsUpdate();
 
       // Check if there's new data returned directly from the update endpoint
-      if (updateResponse.data) {
+      if (updateResponse && updateResponse.data) {
         // If the update endpoint generated new mock data, use it directly
         setInsights(updateResponse.data);
         toast.success("Insights updated successfully");
@@ -211,7 +211,7 @@ export default function AIInsightsPage() {
         healthcare professionals before making health decisions.
       </p>
 
-      {insights.lastUpdated && (
+      {insights && insights.lastUpdated && (
         <p className="text-sm text-muted-foreground">
           Last updated: {new Date(insights.lastUpdated).toLocaleString()}
         </p>
@@ -225,24 +225,32 @@ export default function AIInsightsPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {insights.healthRisks.map((risk) => (
-                <div
-                  key={risk.id}
-                  className="flex items-center justify-between border-b pb-2 last:border-0"
-                >
-                  <div className="flex items-center gap-2">
-                    {getIconComponent(risk.icon)}
-                    <span>{risk.name}</span>
-                  </div>
+              {insights &&
+              insights.healthRisks &&
+              insights.healthRisks.length > 0 ? (
+                insights.healthRisks.map((risk) => (
                   <div
-                    className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${getStatusColor(
-                      risk.level
-                    )}`}
+                    key={risk.id}
+                    className="flex items-center justify-between border-b pb-2 last:border-0"
                   >
-                    {risk.level.charAt(0).toUpperCase() + risk.level.slice(1)}
+                    <div className="flex items-center gap-2">
+                      {getIconComponent(risk.icon)}
+                      <span>{risk.name}</span>
+                    </div>
+                    <div
+                      className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${getStatusColor(
+                        risk.level
+                      )}`}
+                    >
+                      {risk.level.charAt(0).toUpperCase() + risk.level.slice(1)}
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  No health risks data available
+                </p>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -254,20 +262,28 @@ export default function AIInsightsPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {insights.healthGoals.map((goal) => (
-                <div key={goal.id} className="flex items-center gap-3">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-white">
-                    {goal.priority}
+              {insights &&
+              insights.healthGoals &&
+              insights.healthGoals.length > 0 ? (
+                insights.healthGoals.map((goal) => (
+                  <div key={goal.id} className="flex items-center gap-3">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-white">
+                      {goal.priority}
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium">{goal.name}</p>
+                      <p className="text-sm text-muted-foreground">
+                        Target: {goal.target}{" "}
+                        {goal.current && `(currently ${goal.current})`}
+                      </p>
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <p className="font-medium">{goal.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      Target: {goal.target}{" "}
-                      {goal.current && `(currently ${goal.current})`}
-                    </p>
-                  </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  No health goals data available
+                </p>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -279,15 +295,23 @@ export default function AIInsightsPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {insights.recommendations.map((recommendation) => (
-                <div
-                  key={recommendation.id}
-                  className="rounded-lg bg-muted p-4"
-                >
-                  <h4 className="mb-2 font-medium">{recommendation.title}</h4>
-                  <p className="text-sm">{recommendation.content}</p>
-                </div>
-              ))}
+              {insights &&
+              insights.recommendations &&
+              insights.recommendations.length > 0 ? (
+                insights.recommendations.map((recommendation) => (
+                  <div
+                    key={recommendation.id}
+                    className="rounded-lg bg-muted p-4"
+                  >
+                    <h4 className="mb-2 font-medium">{recommendation.title}</h4>
+                    <p className="text-sm">{recommendation.content}</p>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  No recommendations data available
+                </p>
+              )}
             </div>
           </CardContent>
         </Card>

@@ -5,6 +5,12 @@ export const dynamic = "force-dynamic"; // Ensure this is never cached
 
 export async function GET(request: NextRequest) {
   try {
+    // Always provide mock data if environment variable is set
+    if (process.env.NEXT_PUBLIC_USE_MOCK_DATA === "true") {
+      console.log("Using mock data due to environment variable");
+      return NextResponse.json(getLatestMockInsights() || MOCK_INSIGHTS);
+    }
+
     // Check if we have new mock data from an update request
     const insightsUpdated = request.cookies.get("ai_insights_updated");
 
@@ -25,6 +31,7 @@ export async function GET(request: NextRequest) {
   } catch (error: any) {
     console.error("Error handling AI insights request:", {
       message: error.message,
+      stack: error.stack,
     });
 
     // Return mock data on error as fallback
