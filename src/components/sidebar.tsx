@@ -92,7 +92,7 @@ export function Sidebar({ className }: SidebarProps) {
               <span>Profile</span>
             </Link>
             <Link
-              href="/settings"
+              href="/settings/profile"
               className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all hover:bg-accent"
             >
               <Settings className="h-4 w-4" />
