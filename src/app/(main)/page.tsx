@@ -3,7 +3,7 @@
 import { AddRecordDialog } from "@/components/add-record-dialog";
 import { AddVitalDialog } from "@/components/add-vital-dialog";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   getActiveMedications,
   getHealthRecords,
@@ -11,7 +11,15 @@ import {
   getRecentAIInsights,
   getUpcomingAppointments,
 } from "@/lib/api";
-import { Activity, Heart, Pill, Stethoscope } from "lucide-react";
+import {
+  Activity,
+  BarChart,
+  Calendar,
+  FileText,
+  Heart,
+  Pill,
+  Stethoscope,
+} from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -137,8 +145,8 @@ export default function Home() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Health Dashboard</h1>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <h1 className="text-2xl sm:text-3xl font-bold">Health Dashboard</h1>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => router.push("/login")}>
             Logout
@@ -147,7 +155,7 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="p-4 shadow-sm">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -196,143 +204,217 @@ export default function Home() {
         </Card>
 
         <Card className="p-4 shadow-sm">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="rounded-full bg-primary/10 p-2">
-                <Stethoscope className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Next Checkup</p>
-                <p className="text-2xl font-medium">
-                  {nextAppointment ? formatDate(nextAppointment.date) : "--"}
-                </p>
-                {nextAppointment && (
-                  <p className="text-xs text-muted-foreground">
-                    Dr. {nextAppointment.doctor}
-                  </p>
-                )}
-              </div>
+          <div className="flex items-center gap-3">
+            <div className="rounded-full bg-primary/10 p-2">
+              <Stethoscope className="h-5 w-5 text-primary" />
             </div>
-            <div className="flex flex-col items-end gap-1">
-              <Button
-                size="sm"
-                variant="ghost"
-                className="h-9 w-9 rounded-full p-0"
-                onClick={() => router.push("/appointments/schedule")}
-              >
-                <Stethoscope className="h-4 w-4" />
-                <span className="sr-only">Schedule Appointment</span>
-              </Button>
-              <Link
-                href="/appointments"
-                className="text-xs text-primary hover:underline"
-              >
-                View all
-              </Link>
-              {upcomingAppointments.length > 1 && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="p-0 h-6 text-xs text-muted-foreground"
-                  onClick={() => setShowAllAppointments(!showAllAppointments)}
-                >
-                  {showAllAppointments
-                    ? "Hide"
-                    : `+${upcomingAppointments.length - 1} more`}
-                </Button>
-              )}
+            <div>
+              <p className="text-sm text-muted-foreground">Next Appointment</p>
+              <p className="text-lg sm:text-xl font-medium truncate">
+                {nextAppointment ? formatDate(nextAppointment.date) : "None"}
+              </p>
             </div>
           </div>
-
-          {/* Expandable upcoming appointments */}
-          {showAllAppointments && upcomingAppointments.length > 1 && (
-            <div className="border-t mt-3 pt-3 space-y-2">
-              {upcomingAppointments.slice(1).map((appointment, index) => (
-                <div key={index} className="flex justify-between text-sm">
-                  <div>
-                    <span className="font-medium">
-                      Dr. {appointment.doctor}
-                    </span>
-                    <div className="text-xs text-muted-foreground">
-                      {new Date(appointment.date).toLocaleDateString()}
-                    </div>
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    {new Date(appointment.date).toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <Card className="p-6 shadow-sm">
-          <h2 className="mb-4 text-xl font-semibold">AI Health Insights</h2>
-          <div className="space-y-4">
-            {aiInsights.length === 0 ? (
-              <div className="py-4 text-center text-muted-foreground">
-                No AI insights available yet.
-              </div>
-            ) : (
-              aiInsights.map((insight) => (
-                <div key={insight.id} className="rounded-lg bg-muted p-4">
-                  <p className="text-sm">{insight.content}</p>
-                </div>
-              ))
-            )}
-          </div>
-          <div className="mt-4 text-right">
-            <Link href="/ai-insights">
-              <Button variant="outline" size="sm">
-                View All Insights
-              </Button>
-            </Link>
-          </div>
-        </Card>
-
-        <Card className="p-6 shadow-sm">
-          <h2 className="mb-4 text-xl font-semibold">Recent Records</h2>
-          <div className="space-y-4">
-            {recentRecords.length === 0 ? (
-              <div className="py-4 text-center text-muted-foreground">
-                No health records found. Add your first record.
-              </div>
-            ) : (
-              recentRecords.map((record) => (
-                <div
-                  key={record.id}
-                  className="flex items-center justify-between border-b pb-2"
-                >
-                  <div>
-                    <p className="font-medium">{record.title}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {formatDate(record.date)}
-                    </p>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => router.push(`/health-records/${record.id}`)}
-                  >
-                    View
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="space-y-6">
+          <Card className="shadow-sm">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle>Recent Health Records</CardTitle>
+                <Link href="/health-records">
+                  <Button variant="ghost" size="sm">
+                    View All
                   </Button>
+                </Link>
+              </div>
+            </CardHeader>
+            <CardContent className="px-2">
+              {recentRecords.length > 0 ? (
+                <div className="space-y-2">
+                  {recentRecords.map((record) => (
+                    <div
+                      key={record.id}
+                      className="flex items-center justify-between p-2 rounded-lg hover:bg-accent"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="rounded-full bg-primary/10 p-2">
+                          <FileText className="h-4 w-4 text-primary" />
+                        </div>
+                        <div>
+                          <p className="font-medium">{record.title}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {record.doctor}
+                          </p>
+                        </div>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() =>
+                          router.push(`/health-records/${record.id}`)
+                        }
+                      >
+                        View
+                      </Button>
+                    </div>
+                  ))}
                 </div>
-              ))
-            )}
-          </div>
-          <div className="mt-4 text-right">
-            <Link href="/health-records">
-              <Button variant="outline" size="sm">
-                View All Records
-              </Button>
-            </Link>
-          </div>
-        </Card>
+              ) : (
+                <div className="flex flex-col items-center justify-center p-4 text-center">
+                  <p className="text-muted-foreground">No recent records</p>
+                  <Link href="/health-records/add">
+                    <Button variant="link">Add a record</Button>
+                  </Link>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-sm">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle>Upcoming Appointments</CardTitle>
+                <Link href="/appointments">
+                  <Button variant="ghost" size="sm">
+                    View All
+                  </Button>
+                </Link>
+              </div>
+            </CardHeader>
+            <CardContent className="px-2">
+              {upcomingAppointments.length > 0 ? (
+                <div className="space-y-2">
+                  {upcomingAppointments.map((appointment) => (
+                    <div
+                      key={appointment.id}
+                      className="flex flex-col sm:flex-row sm:items-center justify-between p-2 rounded-lg hover:bg-accent gap-2"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="rounded-full bg-primary/10 p-2">
+                          <Calendar className="h-4 w-4 text-primary" />
+                        </div>
+                        <div>
+                          <p className="font-medium">{appointment.title}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {appointment.doctor}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 ml-10 sm:ml-0">
+                        <p className="text-sm">
+                          {formatDate(appointment.date)}
+                          {appointment.time && `, ${appointment.time}`}
+                        </p>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() =>
+                            router.push(`/appointments/${appointment.id}`)
+                          }
+                        >
+                          View
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center p-4 text-center">
+                  <p className="text-muted-foreground">
+                    No upcoming appointments
+                  </p>
+                  <Link href="/appointments/schedule">
+                    <Button variant="link">Schedule an appointment</Button>
+                  </Link>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="space-y-6">
+          <Card className="shadow-sm">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle>AI Health Insights</CardTitle>
+                <Link href="/ai-insights">
+                  <Button variant="ghost" size="sm">
+                    View All
+                  </Button>
+                </Link>
+              </div>
+            </CardHeader>
+            <CardContent className="px-2">
+              {aiInsights.length > 0 ? (
+                <div className="space-y-2">
+                  {aiInsights.map((insight) => (
+                    <div
+                      key={insight.id}
+                      className="flex items-center justify-between p-2 rounded-lg hover:bg-accent"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="rounded-full bg-primary/10 p-2">
+                          <BarChart className="h-4 w-4 text-primary" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium truncate">
+                            {insight.content}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            {new Date(insight.created_at).toLocaleString()}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center p-4 text-center">
+                  <p className="text-muted-foreground">No insights available</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-sm">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle>Active Medications</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent className="px-2">
+              {medications.length > 0 ? (
+                <div className="space-y-2">
+                  {medications.map((medication, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-2 rounded-lg hover:bg-accent"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="rounded-full bg-primary/10 p-2">
+                          <Pill className="h-4 w-4 text-primary" />
+                        </div>
+                        <div>
+                          <p className="font-medium">{medication.name}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {medication.dosage}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center p-4 text-center">
+                  <p className="text-muted-foreground">No active medications</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );

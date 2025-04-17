@@ -184,9 +184,9 @@ Description: ${record.description || "No description provided"}
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Health Records</h1>
-        <div className="flex gap-2">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <h1 className="text-2xl sm:text-3xl font-bold">Health Records</h1>
+        <div className="flex gap-2 flex-wrap">
           {!loading && (
             <Button
               variant="outline"
@@ -197,20 +197,39 @@ Description: ${record.description || "No description provided"}
               <RefreshCw
                 className={`h-4 w-4 ${isRetrying ? "animate-spin" : ""}`}
               />
-              {isRetrying ? "Refreshing..." : "Refresh"}
+              <span className="hidden sm:inline">
+                {isRetrying ? "Refreshing..." : "Refresh"}
+              </span>
             </Button>
           )}
           <Link href="/health-records/add">
             <Button className="gap-2">
               <Plus className="h-4 w-4" />
-              Add New Record
+              <span className="hidden sm:inline">Add New Record</span>
+              <span className="sm:hidden">Add</span>
             </Button>
           </Link>
         </div>
       </div>
 
-      <div className="flex flex-col gap-4 md:flex-row">
-        <Card className="w-full md:w-64">
+      <div className="flex flex-col gap-4 lg:flex-row">
+        {/* Mobile Filter Dropdown for smaller screens */}
+        <div className="lg:hidden">
+          <select
+            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            value={selectedType}
+            onChange={(e) => setSelectedType(e.target.value)}
+          >
+            {recordTypes.map((type) => (
+              <option key={type} value={type}>
+                {type}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Sidebar filter for larger screens */}
+        <Card className="hidden lg:block w-full lg:w-64 h-fit">
           <CardHeader>
             <CardTitle className="text-xl">Record Types</CardTitle>
           </CardHeader>
@@ -243,7 +262,7 @@ Description: ${record.description || "No description provided"}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="gap-2 whitespace-nowrap">
               <Filter className="h-4 w-4" />
               Filter
             </Button>
@@ -255,7 +274,7 @@ Description: ${record.description || "No description provided"}
             </div>
           ) : error && records.length === 0 ? (
             <div className="rounded-md bg-red-50 p-4 text-sm text-red-800 dark:bg-red-900/30 dark:text-red-400">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>{error}</div>
                 <Button size="sm" onClick={handleRetry} disabled={isRetrying}>
                   {isRetrying ? "Retrying..." : "Retry"}
@@ -281,8 +300,8 @@ Description: ${record.description || "No description provided"}
             <div className="space-y-4">
               {filteredRecords.map((record) => (
                 <Card key={record.id} className="overflow-hidden">
-                  <div className="flex items-start gap-4 p-4 sm:p-6">
-                    <div className="rounded-full bg-primary/10 p-2">
+                  <div className="flex flex-col lg:flex-row lg:items-start gap-4 p-4 sm:p-6">
+                    <div className="rounded-full bg-primary/10 p-2 self-start">
                       <FileText className="h-5 w-5 text-primary" />
                     </div>
                     <div className="flex-1">
@@ -301,8 +320,10 @@ Description: ${record.description || "No description provided"}
                           })}
                         </p>
                       </div>
-                      <p className="mt-2 text-sm">{record.description}</p>
-                      <div className="mt-4 flex gap-2">
+                      <p className="mt-2 text-sm line-clamp-2">
+                        {record.description}
+                      </p>
+                      <div className="mt-4 flex flex-wrap gap-2">
                         <Button
                           size="sm"
                           variant="outline"

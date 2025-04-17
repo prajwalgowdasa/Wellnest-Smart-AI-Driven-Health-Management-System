@@ -162,14 +162,16 @@ export default function EditRecordPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <Link href={`/health-records/${id}`}>
             <Button variant="ghost" size="icon">
               <ArrowLeft className="h-4 w-4" />
             </Button>
           </Link>
-          <h1 className="text-3xl font-bold">Edit Record</h1>
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">
+            Edit Record
+          </h1>
         </div>
 
         <AlertDialog>
@@ -180,10 +182,11 @@ export default function EditRecordPage() {
               disabled={isDeleting}
             >
               <Trash className="h-4 w-4" />
-              Delete Record
+              <span className="hidden sm:inline">Delete Record</span>
+              <span className="sm:hidden">Delete</span>
             </Button>
           </AlertDialogTrigger>
-          <AlertDialogContent>
+          <AlertDialogContent className="sm:max-w-md">
             <AlertDialogHeader>
               <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
               <AlertDialogDescription>
@@ -191,7 +194,7 @@ export default function EditRecordPage() {
                 health record and remove it from our servers.
               </AlertDialogDescription>
             </AlertDialogHeader>
-            <AlertDialogFooter>
+            <AlertDialogFooter className="flex-col sm:flex-row gap-2">
               <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogAction
                 onClick={handleDelete}
@@ -212,7 +215,7 @@ export default function EditRecordPage() {
         <div className="rounded-md bg-red-50 p-4 text-sm text-red-800 dark:bg-red-900/30 dark:text-red-400">
           <div className="flex flex-col gap-4">
             <p>{error}</p>
-            <div className="flex gap-3">
+            <div className="flex flex-wrap gap-3">
               <Button
                 onClick={handleRetry}
                 disabled={isRetrying}
@@ -221,17 +224,22 @@ export default function EditRecordPage() {
                 {isRetrying ? (
                   <>
                     <RefreshCw className="h-4 w-4 animate-spin" />
-                    Retrying...
+                    <span className="hidden sm:inline">Retrying...</span>
+                    <span className="sm:hidden">Retry...</span>
                   </>
                 ) : (
                   <>
                     <RefreshCw className="h-4 w-4" />
-                    Retry
+                    <span className="hidden sm:inline">Retry</span>
+                    <span className="sm:hidden">Retry</span>
                   </>
                 )}
               </Button>
               <Link href={`/health-records/${id}`}>
-                <Button variant="outline">Return to Record</Button>
+                <Button variant="outline">
+                  <span className="hidden sm:inline">Return to Record</span>
+                  <span className="sm:hidden">Back</span>
+                </Button>
               </Link>
             </div>
           </div>
@@ -332,7 +340,7 @@ export default function EditRecordPage() {
                   </div>
                 </div>
 
-                <div className="flex justify-end gap-3">
+                <div className="flex flex-wrap justify-end gap-3">
                   <Link href={`/health-records/${id}`}>
                     <Button variant="outline" type="button">
                       Cancel
@@ -342,12 +350,14 @@ export default function EditRecordPage() {
                     {isSaving ? (
                       <>
                         <RefreshCw className="h-4 w-4 animate-spin" />
-                        Saving...
+                        <span className="hidden sm:inline">Saving...</span>
+                        <span className="sm:hidden">Saving...</span>
                       </>
                     ) : (
                       <>
                         <Save className="h-4 w-4" />
-                        Save Changes
+                        <span className="hidden sm:inline">Save Changes</span>
+                        <span className="sm:hidden">Save</span>
                       </>
                     )}
                   </Button>

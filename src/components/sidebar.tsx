@@ -14,11 +14,24 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
-interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
+interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
+  onClose?: () => void;
+}
 
-export function Sidebar({ className }: SidebarProps) {
+export function Sidebar({ className, onClose }: SidebarProps) {
+  const handleLinkClick = () => {
+    if (onClose) {
+      onClose();
+    }
+  };
+
   return (
-    <div className={cn("pb-12 w-64", className)}>
+    <div
+      className={cn(
+        "pb-12 w-64 h-full overflow-y-auto bg-background",
+        className
+      )}
+    >
       <div className="px-4 py-4 border-b">
         <Logo />
       </div>
@@ -31,6 +44,7 @@ export function Sidebar({ className }: SidebarProps) {
             <Link
               href="/"
               className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all hover:bg-accent"
+              onClick={handleLinkClick}
             >
               <Activity className="h-4 w-4" />
               <span>Overview</span>
@@ -38,6 +52,7 @@ export function Sidebar({ className }: SidebarProps) {
             <Link
               href="/health-records"
               className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all hover:bg-accent"
+              onClick={handleLinkClick}
             >
               <FileText className="h-4 w-4" />
               <span>Health Records</span>
@@ -45,6 +60,7 @@ export function Sidebar({ className }: SidebarProps) {
             <Link
               href="/ai-insights"
               className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all hover:bg-accent"
+              onClick={handleLinkClick}
             >
               <BarChart className="h-4 w-4" />
               <span>AI Insights</span>
@@ -59,6 +75,7 @@ export function Sidebar({ className }: SidebarProps) {
             <Link
               href="/appointments"
               className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all hover:bg-accent"
+              onClick={handleLinkClick}
             >
               <Calendar className="h-4 w-4" />
               <span>Appointments</span>
@@ -66,6 +83,7 @@ export function Sidebar({ className }: SidebarProps) {
             <Link
               href="/messages"
               className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all hover:bg-accent"
+              onClick={handleLinkClick}
             >
               <MessageSquare className="h-4 w-4" />
               <span>Messages</span>
@@ -73,6 +91,7 @@ export function Sidebar({ className }: SidebarProps) {
             <Link
               href="/emergency"
               className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all hover:bg-accent"
+              onClick={handleLinkClick}
             >
               <AlertCircle className="h-4 w-4" />
               <span>Emergency</span>
@@ -87,6 +106,7 @@ export function Sidebar({ className }: SidebarProps) {
             <Link
               href="/profile"
               className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all hover:bg-accent"
+              onClick={handleLinkClick}
             >
               <User className="h-4 w-4" />
               <span>Profile</span>
@@ -94,6 +114,7 @@ export function Sidebar({ className }: SidebarProps) {
             <Link
               href="/settings/profile"
               className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all hover:bg-accent"
+              onClick={handleLinkClick}
             >
               <Settings className="h-4 w-4" />
               <span>Settings</span>

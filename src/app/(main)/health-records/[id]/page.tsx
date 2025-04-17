@@ -107,7 +107,9 @@ Description: ${record.description}
             <ArrowLeft className="h-4 w-4" />
           </Button>
         </Link>
-        <h1 className="text-3xl font-bold">Record Details</h1>
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">
+          Record Details
+        </h1>
       </div>
 
       {loading ? (
@@ -118,7 +120,7 @@ Description: ${record.description}
         <div className="rounded-md bg-red-50 p-4 text-sm text-red-800 dark:bg-red-900/30 dark:text-red-400">
           <div className="flex flex-col gap-4">
             <p>{error}</p>
-            <div className="flex gap-3">
+            <div className="flex flex-wrap gap-3">
               <Button
                 onClick={handleRetry}
                 disabled={isRetrying}
@@ -127,17 +129,24 @@ Description: ${record.description}
                 {isRetrying ? (
                   <>
                     <RefreshCw className="h-4 w-4 animate-spin" />
-                    Retrying...
+                    <span className="hidden sm:inline">Retrying...</span>
+                    <span className="sm:hidden">Retry...</span>
                   </>
                 ) : (
                   <>
                     <RefreshCw className="h-4 w-4" />
-                    Retry
+                    <span className="hidden sm:inline">Retry</span>
+                    <span className="sm:hidden">Retry</span>
                   </>
                 )}
               </Button>
               <Link href="/health-records">
-                <Button variant="outline">Return to Health Records</Button>
+                <Button variant="outline">
+                  <span className="hidden sm:inline">
+                    Return to Health Records
+                  </span>
+                  <span className="sm:hidden">Back</span>
+                </Button>
               </Link>
             </div>
           </div>
@@ -145,16 +154,16 @@ Description: ${record.description}
       ) : record ? (
         <div className="space-y-6 print:space-y-4">
           {/* Actions */}
-          <div className="flex justify-end gap-2 print:hidden">
+          <div className="flex flex-wrap justify-end gap-2 print:hidden">
             <Link href={`/health-records/${id}/edit`}>
               <Button variant="outline" className="gap-2">
                 <Edit className="h-4 w-4" />
-                Edit
+                <span className="hidden sm:inline">Edit</span>
               </Button>
             </Link>
             <Button variant="outline" className="gap-2" onClick={handlePrint}>
               <Printer className="h-4 w-4" />
-              Print
+              <span className="hidden sm:inline">Print</span>
             </Button>
             <Button
               variant="outline"
@@ -162,13 +171,14 @@ Description: ${record.description}
               onClick={handleDownloadPDF}
             >
               <Download className="h-4 w-4" />
-              Download PDF
+              <span className="hidden sm:inline">Download PDF</span>
+              <span className="sm:hidden">PDF</span>
             </Button>
           </div>
 
           {/* Header Card */}
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between gap-4">
+            <CardHeader className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div className="flex items-center gap-4">
                 <div className="rounded-full bg-primary/10 p-3">
                   <FileText className="h-6 w-6 text-primary" />
@@ -180,7 +190,7 @@ Description: ${record.description}
                   </p>
                 </div>
               </div>
-              <div className="text-right">
+              <div className="text-left md:text-right">
                 <p className="font-medium">
                   {new Date(record.date).toLocaleDateString("en-US", {
                     year: "numeric",
@@ -216,7 +226,7 @@ Description: ${record.description}
                   <p className="text-sm font-medium text-muted-foreground">
                     Record ID
                   </p>
-                  <p className="font-mono text-sm">{record.id}</p>
+                  <p className="font-mono text-sm break-all">{record.id}</p>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">
