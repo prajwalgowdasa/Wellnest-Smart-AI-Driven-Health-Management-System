@@ -2,19 +2,12 @@
 
 import { Button } from "@/components/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { createHealthRecord, getDoctorAvailability } from "@/lib/api";
-import { ArrowLeft, Clock, Upload } from "lucide-react";
+import { createHealthRecord } from "@/lib/api";
+import { ArrowLeft, Upload } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
-
-type TimeSlot = {
-  id: string;
-  start_time: string;
-  end_time: string;
-  available: boolean;
-};
 
 export default function AddRecordPage() {
   const router = useRouter();
@@ -26,32 +19,6 @@ export default function AddRecordPage() {
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split("T")[0]
   );
-  const [selectedDoctor, setSelectedDoctor] = useState("");
-  const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
-  const [selectedTimeSlot, setSelectedTimeSlot] = useState("");
-  const [isLoadingTimeSlots, setIsLoadingTimeSlots] = useState(false);
-
-  // Load time slots when date or doctor changes
-  useEffect(() => {
-    const loadTimeSlots = async () => {
-      if (selectedDate && selectedDoctor) {
-        setIsLoadingTimeSlots(true);
-        try {
-          const slots = await getDoctorAvailability(
-            selectedDoctor,
-            selectedDate
-          );
-          setTimeSlots(slots);
-        } catch (error) {
-          console.error("Error loading time slots:", error);
-        } finally {
-          setIsLoadingTimeSlots(false);
-        }
-      }
-    };
-
-    loadTimeSlots();
-  }, [selectedDate, selectedDoctor]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -78,7 +45,6 @@ export default function AddRecordPage() {
       recordType: formData.get("recordType") as string,
       doctor: formData.get("doctor") as string,
       date: date,
-      time: formData.get("time") as string,
       description: formData.get("description") as string,
     };
 
@@ -108,10 +74,6 @@ export default function AddRecordPage() {
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  const handleDoctorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSelectedDoctor(e.target.value);
   };
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -202,8 +164,6 @@ export default function AddRecordPage() {
                   name="doctor"
                   className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   placeholder="e.g., Dr. Sarah Johnson"
-                  value={selectedDoctor}
-                  onChange={handleDoctorChange}
                   required
                 />
                 {validationErrors.doctor && (
@@ -236,53 +196,6 @@ export default function AddRecordPage() {
                 <p className="text-xs text-muted-foreground mt-1">
                   Format: YYYY-MM-DD
                 </p>
-              </div>
-
-              <div className="space-y-2 col-span-2">
-                <label htmlFor="time" className="text-sm font-medium">
-                  Available Time Slots
-                </label>
-                <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
-                  {isLoadingTimeSlots ? (
-                    <div className="col-span-full flex items-center justify-center py-4">
-                      <Clock className="animate-spin h-4 w-4 mr-2" />
-                      <span>Loading available times...</span>
-                    </div>
-                  ) : timeSlots.length > 0 ? (
-                    timeSlots.map((slot) => (
-                      <label
-                        key={slot.id}
-                        className={`
-                          flex items-center justify-center p-2 rounded border 
-                          ${
-                            slot.available
-                              ? selectedTimeSlot === slot.start_time
-                                ? "bg-primary text-primary-foreground"
-                                : "bg-background hover:bg-accent cursor-pointer"
-                              : "bg-muted text-muted-foreground cursor-not-allowed opacity-50"
-                          }
-                        `}
-                      >
-                        <input
-                          type="radio"
-                          name="time"
-                          value={slot.start_time}
-                          className="sr-only"
-                          disabled={!slot.available}
-                          checked={selectedTimeSlot === slot.start_time}
-                          onChange={() => setSelectedTimeSlot(slot.start_time)}
-                        />
-                        {slot.start_time}
-                      </label>
-                    ))
-                  ) : (
-                    <div className="col-span-full text-center text-muted-foreground py-4">
-                      {selectedDoctor && selectedDate
-                        ? "No available time slots for this date and provider"
-                        : "Select a healthcare provider and date to see available times"}
-                    </div>
-                  )}
-                </div>
               </div>
             </div>
 
