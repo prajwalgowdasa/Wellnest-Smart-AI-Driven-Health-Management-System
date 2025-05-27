@@ -42,7 +42,7 @@ export default function AddRecordPage() {
 
     const record = {
       title: formData.get("title") as string,
-      recordType: formData.get("recordType") as string,
+      record_type: formData.get("recordType") as string,
       doctor: formData.get("doctor") as string,
       date: date,
       description: formData.get("description") as string,

@@ -96,11 +96,14 @@ export async function POST(request: NextRequest) {
     ) {
       const body = await request.json();
 
+      // Get the correct record type field no matter which property is used
+      const recordType = body.record_type || body.recordType;
+
       // Create a mock record with an ID
       const mockNewRecord = {
         id: `mock-${Date.now()}`,
         title: body.title,
-        record_type: body.recordType,
+        record_type: recordType,
         doctor: body.doctor,
         date: body.date,
         description: body.description,
@@ -113,10 +116,13 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
 
+    // Get the correct record type field no matter which property is used
+    const recordType = body.record_type || body.recordType;
+
     // Create a new health record using DRF API
     const response = await api.post("/health/records/", {
       title: body.title,
-      record_type: body.recordType,
+      record_type: recordType,
       doctor: body.doctor,
       date: body.date,
       description: body.description,
@@ -141,10 +147,14 @@ export async function POST(request: NextRequest) {
     ) {
       try {
         const body = await request.json();
+
+        // Get the correct record type field no matter which property is used
+        const recordType = body.record_type || body.recordType;
+
         const mockNewRecord = {
           id: `mock-${Date.now()}`,
           title: body.title,
-          record_type: body.recordType,
+          record_type: recordType,
           doctor: body.doctor,
           date: body.date,
           description: body.description,

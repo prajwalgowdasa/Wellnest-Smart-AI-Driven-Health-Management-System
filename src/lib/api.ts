@@ -28,6 +28,14 @@ export const createHealthRecord = async (data: any) => {
     medication: "medication",
     vaccination: "vaccination",
     other: "other",
+
+    // Add missing mappings for the dropdown values
+    Consultation: "consultation",
+    "Lab Test": "lab_test",
+    Imaging: "imaging",
+    Medication: "medication",
+    Vaccination: "vaccination",
+    Other: "other",
   };
 
   // Validate the date is in YYYY-MM-DD format
