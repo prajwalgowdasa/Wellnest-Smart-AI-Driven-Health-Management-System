@@ -40,35 +40,13 @@ export default function AddRecordPage() {
       return;
     }
 
-    // Get and validate all required fields
-    const title = formData.get("title") as string;
-    const recordType = formData.get("recordType") as string;
-    const doctor = formData.get("doctor") as string;
-    const description = formData.get("description") as string;
-
-    // Validate required fields
-    if (!title || !recordType || !doctor || !date || !description) {
-      setError("All fields are required");
-      setIsSubmitting(false);
-      return;
-    }
-
-    // Create the request data
-    const apiFormData = new FormData();
-    apiFormData.append("title", title.trim());
-    apiFormData.append("record_type", recordType.trim());
-    apiFormData.append("doctor", doctor.trim());
-    apiFormData.append("date", date);
-    apiFormData.append("description", description.trim());
-
-    // Log the form data for debugging
-    console.log("Form data being sent:", {
-      title: title.trim(),
-      record_type: recordType.trim(),
-      doctor: doctor.trim(),
+    const record = {
+      title: formData.get("title") as string,
+      record_type: formData.get("recordType") as string,
+      doctor: formData.get("doctor") as string,
       date: date,
-      description: description.trim()
-    });
+      description: formData.get("description") as string
+    };
 
     const fileUpload = formData.get("fileUpload") as File;
     if (fileUpload && fileUpload.size > 0) {
@@ -77,10 +55,18 @@ export default function AddRecordPage() {
         setIsSubmitting(false);
         return;
       }
-      apiFormData.append("file", fileUpload);
     }
 
     try {
+      // Create FormData for API submission
+      const apiFormData = new FormData();
+      Object.entries(record).forEach(([key, value]) => {
+        apiFormData.append(key, value);
+      });
+      if (fileUpload && fileUpload.size > 0) {
+        apiFormData.append("file", fileUpload);
+      }
+
       // Submit the record using the API
       const response = await createHealthRecord(apiFormData);
       console.log("Record created successfully:", response);

@@ -1,6 +1,5 @@
 "use client";
 
-import { AddRecordDialog } from "@/components/add-record-dialog";
 import { AddVitalDialog } from "@/components/add-vital-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,6 +17,7 @@ import {
   FileText,
   Heart,
   Pill,
+  Plus,
   Stethoscope,
 } from "lucide-react";
 import Link from "next/link";
@@ -116,7 +116,7 @@ export default function Home() {
           setUpcomingAppointments([]);
         }
 
-        setAiInsights(insights);
+        setAiInsights(insights as AIInsight[]);
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -151,7 +151,13 @@ export default function Home() {
           <Button variant="outline" onClick={() => router.push("/login")}>
             Logout
           </Button>
-          <AddRecordDialog />
+          <Button
+            className="gap-2"
+            onClick={() => router.push("/health-records/add")}
+          >
+            <Plus className="h-4 w-4" />
+            Add Record
+          </Button>{" "}
         </div>
       </div>
 

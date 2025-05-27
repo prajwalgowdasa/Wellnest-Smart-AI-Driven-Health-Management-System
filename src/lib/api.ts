@@ -18,7 +18,51 @@ export const getHealthRecords = async () => {
   return response.data;
 };
 
-export const createHealthRecord = async (data: FormData) => {
+export const createHealthRecord = async (data: any) => {
+  // Map frontend record types to Django choices
+  const recordTypeMapping: Record<string, string> = {
+    consultation: "consultation",
+    labTest: "lab_test",
+    lab_test: "lab_test",
+    imaging: "imaging",
+    medication: "medication",
+    vaccination: "vaccination",
+    other: "other",
+
+    // Add missing mappings for the dropdown values
+    Consultation: "consultation",
+    "Lab Test": "lab_test",
+    Imaging: "imaging",
+    Medication: "medication",
+    Vaccination: "vaccination",
+    Other: "other",
+  };
+
+  // Validate the date is in YYYY-MM-DD format
+  const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+  if (!dateRegex.test(data.date)) {
+    throw new Error("Date must be in YYYY-MM-DD format");
+  }
+
+  // Format the date and time
+  let formattedDate = data.date;
+  if (data.time) {
+    // If time is provided, combine it with the date
+    formattedDate = `${data.date}T${data.time}`;
+  }
+
+  // Ensure data format matches DRF API expectations
+  const formattedData = {
+    title: data.title,
+    record_type: recordTypeMapping[data.recordType] || "other", // Map to valid DRF choice
+    doctor: data.doctor,
+    date: formattedDate,
+    description: data.description,
+    // Add any additional fields needed by Django
+  };
+
+  console.log("Sending health record data to DRF:", formattedData);
+
   try {
     // Log the form data entries for debugging
     console.log("API createHealthRecord - Form data entries:");
