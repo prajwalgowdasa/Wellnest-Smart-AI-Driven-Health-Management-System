@@ -40,6 +40,7 @@ export default function AddRecordPage() {
       return;
     }
 
+<<<<<<< HEAD
     const record = {
       title: formData.get("title") as string,
       record_type: formData.get("recordType") as string,

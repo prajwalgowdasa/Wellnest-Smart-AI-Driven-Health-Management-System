@@ -96,14 +96,21 @@ export async function POST(request: NextRequest) {
     ) {
       const body = await request.json();
 
+<<<<<<< HEAD
       // Get the correct record type field no matter which property is used
       const recordType = body.record_type || body.recordType;
 
+=======
+>>>>>>> a5703aa2 (update in record detail page and error handle)
       // Create a mock record with an ID
       const mockNewRecord = {
         id: `mock-${Date.now()}`,
         title: body.title,
+<<<<<<< HEAD
         record_type: recordType,
+=======
+        record_type: body.record_type,
+>>>>>>> a5703aa2 (update in record detail page and error handle)
         doctor: body.doctor,
         date: body.date,
         description: body.description,
@@ -116,6 +123,7 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
 
+<<<<<<< HEAD
     // Get the correct record type field no matter which property is used
     const recordType = body.record_type || body.recordType;
 
@@ -123,6 +131,12 @@ export async function POST(request: NextRequest) {
     const response = await api.post("/health/records/", {
       title: body.title,
       record_type: recordType,
+=======
+    // Create a new health record using DRF API
+    const response = await api.post("/health/records/", {
+      title: body.title,
+      record_type: body.record_type,
+>>>>>>> a5703aa2 (update in record detail page and error handle)
       doctor: body.doctor,
       date: body.date,
       description: body.description,
@@ -147,6 +161,7 @@ export async function POST(request: NextRequest) {
     ) {
       try {
         const body = await request.json();
+<<<<<<< HEAD
 
         // Get the correct record type field no matter which property is used
         const recordType = body.record_type || body.recordType;
@@ -155,6 +170,12 @@ export async function POST(request: NextRequest) {
           id: `mock-${Date.now()}`,
           title: body.title,
           record_type: recordType,
+=======
+        const mockNewRecord = {
+          id: `mock-${Date.now()}`,
+          title: body.title,
+          record_type: body.record_type,
+>>>>>>> a5703aa2 (update in record detail page and error handle)
           doctor: body.doctor,
           date: body.date,
           description: body.description,

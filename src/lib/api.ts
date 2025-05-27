@@ -18,6 +18,7 @@ export const getHealthRecords = async () => {
   return response.data;
 };
 
+<<<<<<< HEAD
 export const createHealthRecord = async (data: any) => {
   // Map frontend record types to Django choices
   const recordTypeMapping: Record<string, string> = {
